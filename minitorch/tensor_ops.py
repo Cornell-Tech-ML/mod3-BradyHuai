@@ -41,7 +41,9 @@ class TensorOps:
     @staticmethod
     def reduce(
         fn: Callable[[float, float], float], start: float = 0.0
-    ) -> Callable[[Tensor, int], Tensor]: ...
+    ) -> Callable[[Tensor, int], Tensor]:
+        """Reduce placeholder"""
+        ...
 
     @staticmethod
     def matrix_multiply(a: Tensor, b: Tensor) -> Tensor:
@@ -57,10 +59,12 @@ class TensorBackend:
         that implements map, zip, and reduce higher-order functions.
 
         Args:
+        ----
             ops : tensor operations object see `tensor_ops.py`
 
 
         Returns:
+        -------
             A collection of tensor functions
 
         """
@@ -112,12 +116,14 @@ class SimpleOps(TensorOps):
                     out[i, j] = fn(a[i, 0])
 
         Args:
+        ----
             fn: function from float-to-float to apply.
             a (:class:`TensorData`): tensor to map over
             out (:class:`TensorData`): optional, tensor data to fill in,
                    should broadcast with `a`
 
         Returns:
+        -------
             new tensor data
 
         """
@@ -154,11 +160,13 @@ class SimpleOps(TensorOps):
 
 
         Args:
+        ----
             fn: function from two floats-to-float to apply
             a (:class:`TensorData`): tensor to zip over
             b (:class:`TensorData`): tensor to zip over
 
         Returns:
+        -------
             :class:`TensorData` : new tensor data
 
         """
@@ -193,11 +201,14 @@ class SimpleOps(TensorOps):
 
 
         Args:
+        ----
             fn: function from two floats-to-float to apply
             a (:class:`TensorData`): tensor to reduce over
             dim (int): int of dim to reduce
+            start (float): starting value to begin reduce
 
         Returns:
+        -------
             :class:`TensorData` : new tensor
 
         """
@@ -246,9 +257,11 @@ def tensor_map(
       broadcast. (`in_shape` must be smaller than `out_shape`).
 
     Args:
+    ----
         fn: function from float-to-float to apply
 
     Returns:
+    -------
         Tensor map function.
 
     """
@@ -261,7 +274,35 @@ def tensor_map(
         in_shape: Shape,
         in_strides: Strides,
     ) -> None:
-        raise NotImplementedError("Need to include this file from past assignment.")
+
+        if len(out_shape) > MAX_DIMS or len(in_shape) > MAX_DIMS:
+            raise ValueError("Input or Output dimension exceeds maximum dimension.")
+
+        out_index: Index = np.array(out_shape)
+        in_index: Index = np.array(in_shape)
+
+        for i in range(len(out)):
+            # convert ordinal into index in out_shape
+            to_index(i, out_shape, out_index)
+
+            # broadcast the smaller in_index to the bigger out_index
+            broadcast_index(out_index, out_shape, in_shape, in_index)
+
+            # find the position of the out_index and the in_index in storage
+            out_pos = index_to_position(out_index, out_strides)
+            in_pos = index_to_position(in_index, in_strides)
+
+            out[out_pos] = fn(in_storage[in_pos])
+
+        # TODO: solution not working
+        # out_index: Index = np.zeros(MAX_DIMS, np.int32)
+        # in_index: Index = np.zeros(MAX_DIMS, np.int32)
+        # for i in range(len(out)):
+        #     to_index(i, out_shape, out_index)
+        #     broadcast_index(out_index, out_shape, in_shape, in_index)
+        #     o = index_to_position(out_index, out_strides)
+        #     j = index_to_position(in_index, in_strides)
+        #     out[o] = fn(in_storage[j])
 
     return _map
 
@@ -287,9 +328,11 @@ def tensor_zip(
       and `b_shape` broadcast to `out_shape`.
 
     Args:
+    ----
         fn: function mapping two floats to float to apply
 
     Returns:
+    -------
         Tensor zip function.
 
     """
@@ -305,7 +348,49 @@ def tensor_zip(
         b_shape: Shape,
         b_strides: Strides,
     ) -> None:
-        raise NotImplementedError("Need to include this file from past assignment.")
+        if (
+            len(out_shape) > MAX_DIMS
+            or len(a_shape) > MAX_DIMS
+            or len(b_shape) > MAX_DIMS
+        ):
+            raise ValueError("Input or Output dimension exceeds maximum dimension")
+
+        out_index: Index = np.array(out_shape)
+        a_index: Index = np.array(a_shape)
+        b_index: Index = np.array(b_shape)
+        for i in range(len(out)):
+            # convert ordinal into index in out_shape
+            to_index(i, out_shape, out_index)
+
+            # broadcast the a_index and b_index to out_index
+            broadcast_index(out_index, out_shape, a_shape, a_index)
+            broadcast_index(out_index, out_shape, b_shape, b_index)
+
+            # find the position of the indecies in storage
+            out_pos = index_to_position(out_index, out_strides)
+            a_pos = index_to_position(a_index, a_strides)
+            b_pos = index_to_position(b_index, b_strides)
+
+            out[out_pos] = fn(a_storage[a_pos], b_storage[b_pos])
+
+        # TODO: solution not working
+        # if (
+        #     len(out_shape) > MAX_DIMS
+        #     or len(a_shape) > MAX_DIMS
+        #     or len(b_shape) > MAX_DIMS
+        # ):
+        #     raise ValueError("Input or Output dimension exceeds maximum dimension")
+        # out_index: Index = np.zeros(MAX_DIMS, np.int32)
+        # a_index: Index = np.zeros(MAX_DIMS, np.int32)
+        # b_index: Index = np.zeros(MAX_DIMS, np.int32)
+        # for i in range(len(out)):
+        #     to_index(i, out_shape, out_index)
+        #     o = index_to_position(out_index, out_strides)
+        #     broadcast_index(out_index, out_shape, a_shape, a_index)
+        #     j = index_to_position(a_index, a_strides)
+        #     broadcast_index(out_index, out_shape, b_shape, b_index)
+        #     k = index_to_position(b_index, b_strides)
+        #     out[o] = fn(a_storage[j], b_storage[k])
 
     return _zip
 
@@ -319,9 +404,11 @@ def tensor_reduce(
        except with `reduce_dim` turned to size `1`
 
     Args:
+    ----
         fn: reduction function mapping two floats to float
 
     Returns:
+    -------
         Tensor reduce function.
 
     """
@@ -335,7 +422,33 @@ def tensor_reduce(
         a_strides: Strides,
         reduce_dim: int,
     ) -> None:
-        raise NotImplementedError("Need to include this file from past assignment.")
+        if len(out_shape) > MAX_DIMS or len(a_shape) > MAX_DIMS:
+            raise ValueError("Input or Output dimension exceeds maximum dimension.")
+
+        # the output index, same as a_shape but reduced dim is 1
+        out_index: Index = np.array(out_shape)
+
+        for i in range(len(out)):
+            to_index(i, out_shape, out_index)
+
+            for j in range(a_shape[reduce_dim]):
+                # fill the index of the reduced dimension with j
+                out_index[reduce_dim] = j
+
+                # get the storage position of the value to be reduced in a
+                a_pos = index_to_position(out_index, a_strides)
+                out[i] = fn(out[i], a_storage[a_pos])
+        
+        # TODO: solution not working
+        # out_index: Index = np.zeros(MAX_DIMS, np.int32)
+        # reduce_size = a_shape[reduce_dim]
+        # for i in range(len(out)):
+        #     to_index(i, out_shape, out_index)
+        #     o = index_to_position(out_index, out_strides)
+        #     for s in range(reduce_size):
+        #         out_index[reduce_dim] = s
+        #         j = index_to_position(out_index, a_strides)
+        #         out[o] = fn(out[o], a_storage[j])
 
     return _reduce
 

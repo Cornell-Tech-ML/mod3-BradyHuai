@@ -173,7 +173,7 @@ class Mul(ScalarFunction):
         return c
 
     @staticmethod
-    def backward(ctx: Context, d_output: float) -> Tuple[float, ...]:
+    def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
         """Compute the gradient of the multiplication function.
 
         Args:
@@ -405,7 +405,7 @@ class LT(ScalarFunction):
         return 1.0 if a < b else 0.0
 
     @staticmethod
-    def backward(ctx: Context, d_output: float) -> Tuple[float, ...]:
+    def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
         """Compute the gradient of the less than function.
 
         Args:
@@ -442,7 +442,7 @@ class EQ(ScalarFunction):
         return 1.0 if a == b else 0.0
 
     @staticmethod
-    def backward(ctx: Context, d_output: float) -> Tuple[float, ...]:
+    def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
         """Compute the gradient of the equality function.
 
         Args:

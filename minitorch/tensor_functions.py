@@ -251,8 +251,8 @@ class Sigmoid(Function):
             Tensor: The gradient of the input tensor.
 
         """
-        (out,) = ctx.saved_values
-        return out * (- out + 1.0) * grad_output
+        sigma: Tensor = ctx.saved_values[0]
+        return sigma * (- sigma + 1.0) * grad_output
 
 
 class ReLU(Function):
@@ -530,7 +530,7 @@ class Permute(Function):
             Tensor: The gradient of the input tensor.
 
         """
-        (order,) = ctx.saved_values
+        order: Tensor = ctx.saved_values[0]
         reverse_order: List[int] = [
             a[0]
             for a in sorted(

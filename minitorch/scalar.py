@@ -169,7 +169,9 @@ class Scalar:
             d_output = 1.0
         backpropagate(self, d_output)
 
-    # TODO: Implement for Task 1.2.
+    def __add__(self, other: ScalarLike) -> Scalar:
+        return Add.apply(self, other)
+
     def __lt__(self, other: ScalarLike) -> Scalar:
         return LT.apply(self, other)
 
@@ -181,9 +183,6 @@ class Scalar:
 
     def __neg__(self) -> Scalar:
         return Neg.apply(self)
-
-    def __add__(self, other: ScalarLike) -> Scalar:
-        return Add.apply(self, other)
 
     def __eq__(self, other: ScalarLike) -> Scalar:
         return EQ.apply(self, other)

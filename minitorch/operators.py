@@ -1,39 +1,7 @@
 """Collection of the core mathematical operators used throughout the code base."""
 
 import math
-
-# ## Task 0.1
 from typing import Callable, Iterable
-
-#
-# Implementation of a prelude of elementary functions.
-
-# Mathematical functions:
-# - mul
-# - id
-# - add
-# - neg
-# - lt
-# - eq
-# - max
-# - is_close
-# - sigmoid
-# - relu
-# - log
-# - exp
-# - log_back
-# - inv
-# - inv_back
-# - relu_back
-#
-# For sigmoid calculate as:
-# $f(x) =  \frac{1.0}{(1.0 + e^{-x})}$ if x >=0 else $\frac{e^x}{(1.0 + e^{x})}$
-# For is_close:
-# $f(x) = |x - y| < 1e-2$
-
-
-# Implement for Task 0.1.
-
 
 def mul(x: float, y: float) -> float:
     """Multiply two floating-point numbers.
@@ -295,80 +263,24 @@ def relu_back(x: float, d: float) -> float:
     return d if x > 0 else 0.0
 
 
-# ## Task 0.3
-
-# Small practice library of elementary higher-order functions.
-
-# Implement the following core functions
-# - map
-# - zipWith
-# - reduce
-#
-# Use these to implement
-# - negList : negate a list
-# - addLists : add two lists together
-# - sum: sum lists
-# - prod: take the product of lists
-
-
-def map(f: Callable[[float], float], ls: Iterable[float]) -> Iterable[float]:
+def map(fn: Callable[[float], float]) -> Callable[[Iterable[float]], Iterable[float]]:
     """Higher-order function that applies a given function to each element of an iterable.
 
     Args:
     ----
-        f (Callable[[float], float]): The function to apply.
-        ls (Iterable[float]): The list to apply the function to.
+        fn (Callable[[float], float]): The function to apply to each element.
 
     Returns:
     -------
-        Iterable[float]: The list of results after applying the function to each element.
+        Callable[[Iterable[float]], Iterable[float]]: A function that applies `fn` to an iterable.
 
     """
-    return [f(x) for x in ls]
-
-
-def zipWith(
-    f: Callable[[float, float], float], ls1: Iterable[float], ls2: Iterable[float]
-) -> Iterable[float]:
-    """Higher-order function that combines elements from two iterables using a given function.
-
-    Args:
-    ----
-        f (Callable[[float, float], float]): The function to apply.
-        ls1 (Iterable[float]): The first list.
-        ls2 (Iterable[float]): The second list.
-
-    Returns:
-    -------
-        Iterable[float]: The list of results after applying the function to corresponding elements of two lists.
-
-    """
-    return [f(x, y) for x, y in zip(ls1, ls2)]
-
-
-def reduce(
-    f: Callable[[float, float], float], ls: Iterable[float], initial: float
-) -> float:
-    """Higher-order function that reduces an iterable to a single value using a given function.
-
-    Args:
-    ----
-        f (Callable[[float, float], float]): The function to apply.
-        ls (Iterable[float]): The list to reduce.
-        initial (float): The initial value.
-
-    Returns:
-    -------
-        float: The reduced value.
-
-    """
-    result = initial
-    for x in ls:
-        result = f(result, x)
-    return result
-
-
-# Implement for Task 0.3.
+    def _map(ls: Iterable[float]) -> Iterable[float]:
+        ret = []
+        for x in ls:
+            ret.append(fn(x))
+        return ret
+    return _map
 
 
 def negList(ls: Iterable[float]) -> Iterable[float]:
@@ -383,7 +295,31 @@ def negList(ls: Iterable[float]) -> Iterable[float]:
         Iterable[float]: The list of negated numbers.
 
     """
-    return map(neg, ls)
+    return map(neg)(ls)
+
+
+def zipWith(
+    fn: Callable[[float, float], float],
+) -> Callable[[Iterable[float], Iterable[float]], Iterable[float]]:
+    """Higher-order function that combines elements from two iterables using a given function.
+
+    Args:
+    ----
+        fn (Callable[[float, float], float]): The function to apply to two elements.
+        ls1 (Iterable[float]): The first list.
+        ls2 (Iterable[float]): The second list.
+
+    Returns:
+    -------
+        Iterable[float]: The list of results after applying the function to corresponding elements of two lists.
+
+    """
+    def _zipWith(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
+        ret = []
+        for x, y in zip(ls1, ls2):
+            ret.append(fn(x, y))
+        return ret
+    return _zipWith
 
 
 def addLists(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
@@ -399,22 +335,31 @@ def addLists(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
         Iterable[float]: The list of added numbers
 
     """
-    return zipWith(add, ls1, ls2)
+    return zipWith(add)(ls1, ls2)
 
 
-def prod(ls: Iterable[float]) -> float:
-    """Multiply all numbers in a list.
+def reduce(
+    fn: Callable[[float, float], float], start: float
+) -> Callable[[Iterable[float]], float]:
+    """Higher-order function that reduces an iterable to a single value using a given function.
 
     Args:
     ----
-        ls (Iterable[float]): The list to multiply.
+        fn (Callable[[float, float], float]): The function to apply.
+        start (float): The initial value for the reduction.
 
     Returns:
     -------
-        float: The product of the numbers in the list.
+        float: The reduced value.
 
     """
-    return reduce(mul, ls, 1)
+    def _reduce(ls: Iterable[float]) -> float:
+        val = start
+        for l in ls:
+            val = fn(val, l)
+        return val
+    
+    return _reduce
 
 
 def sum(ls: Iterable[float]) -> float:
@@ -429,4 +374,19 @@ def sum(ls: Iterable[float]) -> float:
         float: The sum of the numbers in the list.
 
     """
-    return reduce(add, ls, 0)
+    return reduce(add, 0.0)(ls)
+
+
+def prod(ls: Iterable[float]) -> float:
+    """Multiply all numbers in a list.
+
+    Args:
+    ----
+        ls (Iterable[float]): The list to multiply.
+
+    Returns:
+    -------
+        float: The product of the numbers in the list.
+
+    """
+    return reduce(mul, 1.0)(ls)

@@ -95,7 +95,7 @@ def broadcast_index(
     """
     for i, s in enumerate(shape):
         if s > 1:
-            out_index[i] = big_index[i + (len(big_index) - len(shape))]
+            out_index[i] = big_index[i + (len(big_shape) - len(shape))]
         else:
             out_index[i] = 0
     return None
@@ -302,9 +302,11 @@ class TensorData:
             range(len(self.shape))
         ), f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
 
-        new_shape = tuple([self.shape[i] for i in order])
-        new_strides = tuple([self.strides[i] for i in order])
-        return TensorData(self._storage, new_shape, new_strides)
+        return TensorData(
+            self._storage,
+            tuple([self.shape[i] for i in order]),
+            tuple([self._strides[i] for i in order]),
+        )
 
     def to_string(self) -> str:
         """Convert to string"""

@@ -31,14 +31,12 @@ class Module:
 
     def train(self) -> None:
         """Set the `training` flag of this and descendent to true."""
-        # Implement for Task 0.4.
         for module in self.modules():
             module.train()
         self.training = True
 
     def eval(self) -> None:
         """Set the `training` flag of this and descendent to false."""
-        # Implement for Task 0.4.
         for module in self.modules():
             module.eval()
         self.training = False
@@ -51,7 +49,6 @@ class Module:
             The name and `Parameter` of each ancestor parameter.
 
         """
-        # Implement for Task 0.4.
         parameters = {}
         for k, v in self._parameters.items():
             parameters[k] = v
@@ -64,7 +61,6 @@ class Module:
 
     def parameters(self) -> Sequence[Parameter]:
         """Enumerate over all the parameters of this module and its descendents."""
-        # Implement for Task 0.4.
         return [j for _, j in self.named_parameters()]
 
     def add_parameter(self, k: str, v: Any) -> Parameter:

@@ -366,12 +366,12 @@ class Tensor:
         """Return the product of another tensor and this tensor."""
         return self * other
 
-    def all(self, dim: Optional[TensorLike] = None) -> Tensor:
+    def all(self, dim: Optional[int] = None) -> Tensor:
         """Returns a tensor indicating whether all elements are True along the specified dimension."""
-        if dim is not None:
-            return All.apply(self, self._ensure_tensor(dim))
-        else:
+        if dim is None:
             return All.apply(self.view(self.size), self._ensure_tensor(0))
+        else:
+            return All.apply(self, self._ensure_tensor(dim))
 
     def is_close(self, other: Tensor) -> Tensor:
         """Returns a tensor indicating whether the two tensors are close."""
@@ -393,7 +393,7 @@ class Tensor:
         """Return the exp of this tensor."""
         return Exp.apply(self)
 
-    def sum(self, dim: Optional[TensorLike] = None) -> Tensor:
+    def sum(self, dim: Optional[int] = None) -> Tensor:
         """Calculate the sum of the tensor along the specified dimension.
 
         Args:
@@ -405,10 +405,10 @@ class Tensor:
             Tensor: The resulting tensor after summation.
 
         """
-        if dim is not None:
-            return Sum.apply(self, self._ensure_tensor(dim))
-        else:
+        if dim is None:
             return Sum.apply(self.contiguous().view(self.size), self._ensure_tensor(0))
+        else:
+            return Sum.apply(self, self._ensure_tensor(dim))
 
     def mean(self, dim: Optional[int] = None) -> Tensor:
         """Calculate the mean of the tensor along the specified dimension.

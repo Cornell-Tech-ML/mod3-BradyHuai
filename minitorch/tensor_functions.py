@@ -252,7 +252,7 @@ class Sigmoid(Function):
 
         """
         sigma: Tensor = ctx.saved_values[0]
-        return sigma * (- sigma + 1.0) * grad_output
+        return sigma * (-sigma + 1.0) * grad_output
 
 
 class ReLU(Function):
@@ -385,8 +385,7 @@ class Sum(Function):
         return t1.f.add_reduce(t1, int(dim.item()))
 
     @staticmethod
-    def backward(
-        ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:
+    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:
         """Computes the backward pass for the tensor operation.
 
         Args:

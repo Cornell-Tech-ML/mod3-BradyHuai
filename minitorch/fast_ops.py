@@ -33,12 +33,14 @@ def njit(fn: Fn, **kwargs: Any) -> Fn:
     """JIT compile a function with Numba.
 
     Args:
+    ----
         fn: The function to be compiled.
         **kwargs: Additional keyword arguments for Numba's njit.
 
     Returns:
+    -------
         The JIT-compiled function.
-        
+
     """
     return _njit(inline="always", **kwargs)(fn)  # type: ignore
 
@@ -180,7 +182,11 @@ def tensor_map(
     ) -> None:
         # TODO: Implement for Task 3.1.
 
-        if (len(in_shape) == len(out_shape)) and (in_shape == out_shape).all() and (in_strides == out_strides).all():
+        if (
+            (len(in_shape) == len(out_shape))
+            and (in_shape == out_shape).all()
+            and (in_strides == out_strides).all()
+        ):
             for i in prange(len(out)):
                 out[i] = fn(in_storage[i])
         else:
@@ -231,9 +237,15 @@ def tensor_zip(
         b_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 3.1.
-        
-        if (len(a_shape) == len(out_shape)) and (a_shape == out_shape).all() and (a_strides == out_strides).all() and \
-                (len(b_shape) == len(out_shape)) and (b_shape == out_shape).all() and (b_strides == out_strides).all():
+
+        if (
+            (len(a_shape) == len(out_shape))
+            and (a_shape == out_shape).all()
+            and (a_strides == out_strides).all()
+            and (len(b_shape) == len(out_shape))
+            and (b_shape == out_shape).all()
+            and (b_strides == out_strides).all()
+        ):
             for i in prange(len(out)):
                 out[i] = fn(a_storage[i], b_storage[i])
         else:
@@ -368,7 +380,9 @@ def _tensor_matrix_multiply(
                     out_temp += a_storage[a_index] * b_storage[b_index]
                     a_index += a_step
                     b_index += b_step
-                out_index = batch * out_strides[0] + i * out_strides[-2] + j * out_strides[-1]
+                out_index = (
+                    batch * out_strides[0] + i * out_strides[-2] + j * out_strides[-1]
+                )
                 out[out_index] = out_temp
 
 

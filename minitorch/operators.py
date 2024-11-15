@@ -3,6 +3,7 @@
 import math
 from typing import Callable, Iterable
 
+
 def mul(x: float, y: float) -> float:
     """Multiply two floating-point numbers.
 
@@ -275,11 +276,13 @@ def map(fn: Callable[[float], float]) -> Callable[[Iterable[float]], Iterable[fl
         Callable[[Iterable[float]], Iterable[float]]: A function that applies `fn` to an iterable.
 
     """
+
     def _map(ls: Iterable[float]) -> Iterable[float]:
         ret = []
         for x in ls:
             ret.append(fn(x))
         return ret
+
     return _map
 
 
@@ -314,11 +317,13 @@ def zipWith(
         Iterable[float]: The list of results after applying the function to corresponding elements of two lists.
 
     """
+
     def _zipWith(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
         ret = []
         for x, y in zip(ls1, ls2):
             ret.append(fn(x, y))
         return ret
+
     return _zipWith
 
 
@@ -353,12 +358,13 @@ def reduce(
         float: The reduced value.
 
     """
+
     def _reduce(ls: Iterable[float]) -> float:
         val = start
         for l in ls:
             val = fn(val, l)
         return val
-    
+
     return _reduce
 
 

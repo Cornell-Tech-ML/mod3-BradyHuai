@@ -476,7 +476,7 @@ def _mm_practice(out: Storage, a: Storage, b: Storage, size: int) -> None:
     out_temp = 0.0 # local variable to store output
 
     for k in range(size):
-        out_temp += a_cache[i, k] * b_cache[j, k]
+        out_temp += a_cache[i, k] * b_cache[k, j]
     
     # Write the result for this block to global memory
     out[size * i + j] = out_temp

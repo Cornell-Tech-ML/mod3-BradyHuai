@@ -322,25 +322,25 @@ def _sum_practice(out: Storage, a: Storage, size: int) -> None:
     # TODO: Implement for Task 3.3.
     # Load data into shared memory
     if i < size:
-        cache[pos] = a[i]
+        v = float(a[i])
+        cache[pos] = v
+        cuda.syncthreads()  # Ensure all threads have loaded their data
     else:
         cache[pos] = 0.0
 
-    cuda.syncthreads()  # Ensure all threads have loaded their data
-
     # Perform reduction in shared memory
-    offset = 1
-    while offset < BLOCK_DIM:
-        if pos % (2*offset) == 0:
-            cache[pos] += cache[pos + offset]
-        
-        offset *= 2
-        cuda.syncthreads()  # Ensure all threads have completed their addition
+    if i < size:
+        offset = 1
+        while offset < BLOCK_DIM:
+            if pos % (2*offset) == 0:
+                cache[pos] += cache[pos + offset]
+                cuda.syncthreads()  # Ensure all threads have completed their addition
 
-    # Write the result for this block to global memory
-    if pos == 0:
-        out[cuda.blockIdx.x] = cache[0]
+            offset *= 2
 
+        # Write the result for this block to global memory
+        if pos == 0:
+            out[cuda.blockIdx.x] = cache[0]
 
 jit_sum_practice = cuda.jit()(_sum_practice)
 
@@ -399,27 +399,28 @@ def tensor_reduce(
         pos = cuda.threadIdx.x
 
         # TODO: Implement for Task 3.3.
+        cache[pos] = reduce_value
 
-        if pos < out_size:
-            index = cuda.blockIdx.x * BLOCK_DIM + pos
-            if index < a_shape[reduce_dim]:  # Ensure we are within bounds
-                cache[pos] = a_storage[index_to_position(index, a_strides)]
-            else:
-                cache[pos] = reduce_value  # Use the initial value for reduction
-        else:
-            cache[pos] = reduce_value
+        if out_pos < out_size:
+            to_index(out_pos, out_shape, out_index)
+            out_index[reduce_dim] = out_index[reduce_dim] * BLOCK_DIM + pos
 
-        cuda.syncthreads()  # Ensure all threads have loaded their data
+            o = index_to_position(out_index, out_strides)
 
-        # Perform reduction in shared memory
-        for offset in range(1, BLOCK_DIM):
-            if pos % (2 * offset) == 0:
-                cache[pos] = fn(cache[pos], cache[pos + offset])
-            cuda.syncthreads()  # Ensure all threads have completed their addition
+            if out_index[reduce_dim] < a_shape[reduce_dim]:
+                i = index_to_position(out_index, a_strides)
+                cache[pos] = a_storage[i] # load into shared memory
+                cuda.syncthreads()
 
-        # Write the result for this block to global memory
-        if pos == 0:
-            out[cuda.blockIdx.x] = cache[0]
+                offset = 1
+                while offset < BLOCK_DIM:
+                    if pos % (2 * offset) == 0:
+                        cache[pos] = fn(cache[pos], cache[pos + offset])
+                        cuda.syncthreads() # Ensure all threads have completed reduction
+                    offset *= 2
+                
+            if pos == 0:
+                out[o] = cache[0] # write to global
 
     return jit(_reduce)  # type: ignore
 

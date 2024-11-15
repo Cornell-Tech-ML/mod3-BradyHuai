@@ -458,13 +458,44 @@ def _mm_practice(out: Storage, a: Storage, b: Storage, size: int) -> None:
     """
     BLOCK_DIM = 32
     # TODO: Implement for Task 3.3.
-    raise NotImplementedError("Need to implement for Task 3.3")
+    # Allocate space for shared memory
+    a_cache = cuda.shared.array((BLOCK_DIM, BLOCK_DIM), numba.float64)
+    b_cache = cuda.shared.array((BLOCK_DIM, BLOCK_DIM), numba.float64)
+
+    i = cuda.threadIdx.x
+    j = cuda.threadIdx.y
+
+    if i >= size or j >= size:
+        return
+    
+    # Copy data to shared memory
+    a_cache[i, j] = a[size * i + j]
+    b_cache[i, j] = b[size * i + j]
+    cuda.syncthreads() # Ensure all threads have loaded their data
+
+    out_temp = 0.0 # local variable to store output
+
+    for k in range(size):
+        out_temp += a_cache[i, k] * b_cache[j, k]
+    
+    # Write the result for this block to global memory
+    out[size * i + j] = out_temp
 
 
 jit_mm_practice = jit(_mm_practice)
 
 
 def mm_practice(a: Tensor, b: Tensor) -> TensorData:
+    """Calculates the matrix multiplication of two tensors.
+
+    Args:
+        a: The first tensor.
+        b: The second tensor.
+
+    Returns:
+        A TensorData object containing the result of the matrix multiplication.
+
+    """
     (size, _) = a.shape
     threadsperblock = (THREADS_PER_BLOCK, THREADS_PER_BLOCK)
     blockspergrid = 1
@@ -527,7 +558,27 @@ def _tensor_matrix_multiply(
     #    b) Copy into shared memory for b matrix
     #    c) Compute the dot produce for position c[i, j]
     # TODO: Implement for Task 3.4.
-    raise NotImplementedError("Need to implement for Task 3.4")
+    acc = 0.0
+    # move across shared dimension by block dim
+    for k in range(0, a_shape[0], BLOCK_DIM):
+        if i < a_shape[1] and k + pj < a_shape[2]: # Guard the index to be within the shape
+            # Copy a matrix in storage to shared storage
+            a_shared[pi, pj] = a_storage[a_batch_stride * batch + a_strides[1] * i + a_strides[2] * k]
+
+        if j < b_shape[2] and k + pi < b_shape[1]: # Guard the index to be within the shape
+            # Copy b matrix in storage to shared storage
+            b_shared[pi, pj] = b_storage[b_batch_stride * batch + b_strides[2] * j + b_strides[1] * k]
+        
+        cuda.syncthreads() # Ensure all threads have loaded their data
+        
+        # Compute the dot produce for position c[i, j]
+        for local_k in range(max(BLOCK_DIM, a_shape[2] - k)):
+            # accumulate dot product using shared values
+            acc += a_shared[pi, local_k] * b_shared[local_k, pj]
+    
+    if i < out_shape[1] and j < out_shape[2]:
+        # Write the result for this block to global memory
+        out[out_strides[0] * batch + out_strides[1] * i + out_strides[2] * j] = acc
 
 
 tensor_matrix_multiply = jit(_tensor_matrix_multiply)

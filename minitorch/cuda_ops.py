@@ -560,24 +560,29 @@ def _tensor_matrix_multiply(
     # TODO: Implement for Task 3.4.
     acc = 0.0
     # move across shared dimension by block dim
-    for k in range(0, a_shape[0], BLOCK_DIM):
+    for k in range(0, out_size, BLOCK_DIM):
         if i < a_shape[1] and k + pj < a_shape[2]: # Guard the index to be within the shape
             # Copy a matrix in storage to shared storage
-            a_shared[pi, pj] = a_storage[a_batch_stride * batch + a_strides[1] * i + a_strides[2] * k]
+            a_shared[pi, pj] = a_storage[a_batch_stride * batch + a_strides[1] * i + a_strides[2] * (k + pj)]
+        else:
+            a_shared[pi, pj] = 0.0
 
         if j < b_shape[2] and k + pi < b_shape[1]: # Guard the index to be within the shape
             # Copy b matrix in storage to shared storage
-            b_shared[pi, pj] = b_storage[b_batch_stride * batch + b_strides[2] * j + b_strides[1] * k]
+            b_shared[pi, pj] = b_storage[b_batch_stride * batch + b_strides[2] * j + b_strides[1] * (k + pi)]
+        else:
+            b_shared[pi, pj] = 0.0
         
         cuda.syncthreads() # Ensure all threads have loaded their data
         
         # Compute the dot produce for position c[i, j]
-        for local_k in range(max(BLOCK_DIM, a_shape[2] - k)):
+        for local_k in range(min(BLOCK_DIM, out_size - k)):
             # accumulate dot product using shared values
             acc += a_shared[pi, local_k] * b_shared[local_k, pj]
+        cuda.syncthreads() # Ensure all threads have finished
     
     if i < out_shape[1] and j < out_shape[2]:
-        # Write the result for this block to global memory
+        # Write the result for this kernel to global memory
         out[out_strides[0] * batch + out_strides[1] * i + out_strides[2] * j] = acc
 
 

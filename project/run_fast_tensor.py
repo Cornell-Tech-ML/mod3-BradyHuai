@@ -125,6 +125,12 @@ if __name__ == "__main__":
     HIDDEN = int(args.HIDDEN)
     RATE = args.RATE
 
+    start_time = time.time()
+
     FastTrain(
         HIDDEN, backend=FastTensorBackend if args.BACKEND != "gpu" else GPUBackend
     ).train(data, RATE)
+
+    time_elapsed = time.time() - start_time
+    time_per_epoch = time_elapsed / (500)
+    print("Time per epoch: {:,.3f}s.".format(time_per_epoch))

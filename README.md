@@ -30,3 +30,18 @@ python sync_previous_module.py previous-module-dir current-module-dir
 The files that will be synced are:
 
         minitorch/tensor_data.py minitorch/tensor_functions.py minitorch/tensor_ops.py minitorch/operators.py minitorch/scalar.py minitorch/scalar_functions.py minitorch/module.py minitorch/autodiff.py minitorch/module.py project/run_manual.py project/run_scalar.py project/run_tensor.py minitorch/operators.py minitorch/module.py minitorch/autodiff.py minitorch/tensor.py minitorch/datasets.py minitorch/testing.py minitorch/optim.py
+
+
+## Task 3.1
+### Map diagnostics output
+![Alt text](./images/map-task1.png)
+### Zip diagnostics output
+![Alt text](./images/zip-task1-1.png)
+![Alt text](./images/zip-task1-2.png)
+### Reduce diagnostics output
+![Alt text](./images/reduce-task1.png)
+
+
+## Task 3.2
+![Alt text](./images/task2-1.png)
+![Alt text](./images/task2-2.png)

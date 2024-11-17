@@ -45,3 +45,49 @@ The files that will be synced are:
 ## Task 3.2
 ![Alt text](./images/task2-1.png)
 ![Alt text](./images/task2-2.png)
+
+
+## Task 3.5
+
+### Simple
+
+#### GPU
+![Alt text](./images/simple-gpu-1.png)
+![Alt text](./images/simple-gpu-2.png)
+![Alt text](./images/simple-gpu-3.png)
+Time per epoch: 1.868s
+#### CPU
+![Alt text](./images/simple-cpu.png)
+Time per epoch: 0.251s
+
+
+### Split
+
+#### GPU
+![Alt text](./images/split-gpu-1.png)
+![Alt text](./images/split-gpu-2.png)
+Time per epoch: 1.816s
+#### CPU
+![Alt text](./images/split-cpu.png)
+Time per epoch: 0.263s
+
+### XOR
+
+#### GPU
+![Alt text](./images/xor-gpu-1.png)
+![Alt text](./images/xor-gpu-2.png)
+Time per epoch: 1.867s
+#### CPU
+![Alt text](./images/xor-cpu.png)
+Time per epoch: 0.251s
+
+### Simple Large Model (hidden size = 200)
+#### GPU
+![Alt text](./images/large-gpu-1.png)
+![Alt text](./images/large-gpu-2.png)
+Time per epoch: 2.394s
+
+#### CPU
+![Alt text](./images/large-cpu-1.png)
+![Alt text](./images/large-cpu-2.png)
+Time per epoch: 0.478s

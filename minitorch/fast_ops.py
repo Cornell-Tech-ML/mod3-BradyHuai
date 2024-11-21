@@ -180,7 +180,6 @@ def tensor_map(
         in_shape: Shape,
         in_strides: Strides,
     ) -> None:
-
         if (
             (len(in_shape) == len(out_shape))
             and (in_shape == out_shape).all()
@@ -235,7 +234,6 @@ def tensor_zip(
         b_shape: Shape,
         b_strides: Strides,
     ) -> None:
-
         if (
             (len(a_shape) == len(out_shape))
             and (a_shape == out_shape).all()
@@ -293,7 +291,6 @@ def tensor_reduce(
         a_strides: Strides,
         reduce_dim: int,
     ) -> None:
-
         for i in prange(len(out)):
             out_index: Index = np.empty(MAX_DIMS, np.int32)
             reduce_size = a_shape[reduce_dim]

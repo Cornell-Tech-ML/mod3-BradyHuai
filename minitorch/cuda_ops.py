@@ -242,7 +242,6 @@ def tensor_map(
         out_index = cuda.local.array(MAX_DIMS, numba.int32)
         in_index = cuda.local.array(MAX_DIMS, numba.int32)
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
-        # TODO: Implement for Task 3.3.
 
         if i < out_size:
             to_index(i, out_shape, out_index)
@@ -291,7 +290,6 @@ def tensor_zip(
         b_index = cuda.local.array(MAX_DIMS, numba.int32)
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
 
-        # TODO: Implement for Task 3.3.
         if i < out_size:
             to_index(i, out_shape, out_index)
             o = index_to_position(out_index, out_strides)
@@ -331,7 +329,6 @@ def _sum_practice(out: Storage, a: Storage, size: int) -> None:
     i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
     pos = cuda.threadIdx.x
 
-    # TODO: Implement for Task 3.3.
     # Load data into shared memory
     if i < size:
         v = float(a[i])
@@ -413,7 +410,6 @@ def tensor_reduce(
         out_pos = cuda.blockIdx.x
         pos = cuda.threadIdx.x
 
-        # TODO: Implement for Task 3.3.
         cache[pos] = reduce_value
 
         if out_pos < out_size:
@@ -472,7 +468,6 @@ def _mm_practice(out: Storage, a: Storage, b: Storage, size: int) -> None:
 
     """
     BLOCK_DIM = 32
-    # TODO: Implement for Task 3.3.
     # Allocate space for shared memory
     a_cache = cuda.shared.array((BLOCK_DIM, BLOCK_DIM), numba.float64)
     b_cache = cuda.shared.array((BLOCK_DIM, BLOCK_DIM), numba.float64)
@@ -574,10 +569,10 @@ def _tensor_matrix_multiply(
     #    a) Copy into shared memory for a matrix.
     #    b) Copy into shared memory for b matrix
     #    c) Compute the dot produce for position c[i, j]
-    # TODO: Implement for Task 3.4.
+
     acc = 0.0
     # move across shared dimension by block dim
-    for k in range(0, out_size, BLOCK_DIM):
+    for k in range(0, a_shape[-1], BLOCK_DIM):
         if (
             i < a_shape[1] and k + pj < a_shape[2]
         ):  # Guard the index to be within the shape

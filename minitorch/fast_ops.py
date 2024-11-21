@@ -180,7 +180,6 @@ def tensor_map(
         in_shape: Shape,
         in_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 3.1.
 
         if (
             (len(in_shape) == len(out_shape))
@@ -236,7 +235,6 @@ def tensor_zip(
         b_shape: Shape,
         b_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 3.1.
 
         if (
             (len(a_shape) == len(out_shape))
@@ -295,7 +293,6 @@ def tensor_reduce(
         a_strides: Strides,
         reduce_dim: int,
     ) -> None:
-        # TODO: Implement for Task 3.1.
 
         for i in prange(len(out)):
             out_index: Index = np.empty(MAX_DIMS, np.int32)
@@ -360,7 +357,6 @@ def _tensor_matrix_multiply(
     a_batch_stride = a_strides[0] if a_shape[0] > 1 else 0
     b_batch_stride = b_strides[0] if b_shape[0] > 1 else 0
 
-    # TODO: Implement for Task 3.2.
     # Iterate over the batch dimension
     for batch in prange(out_shape[0]):
         # Calculate the base index for the current batch

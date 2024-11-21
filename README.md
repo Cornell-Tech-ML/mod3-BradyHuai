@@ -47,6 +47,10 @@ The files that will be synced are:
 ![Alt text](./images/task2-2.png)
 
 
+## Task 3.4
+![Alt text](./images/task3.4.png)
+![Alt text](./images/graph.png)
+
 ## Task 3.5
 
 ### Simple
